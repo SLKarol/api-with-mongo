@@ -1,4 +1,3 @@
-import { JwtAuthGuard } from '@app/auth/guards/jwt-auth.guard';
 import {
   Body,
   Controller,
@@ -10,10 +9,16 @@ import {
   Get,
   Delete,
   Param,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
-import { MainCreateFlyLevelDtoDto } from './dto/createFlyLevel.dto';
 
+import { User } from '@app/auth/decorators/user.decorator';
+import { JwtAuthGuard } from '@app/auth/guards/jwt-auth.guard';
+import { ACCESS_DENIED } from '@app/consts/messages';
+
+import { MainCreateFlyLevelDtoDto } from './dto/createFlyLevel.dto';
 import { ListFlyLevelDto, ResponseFlyLevelDto } from './dto/flyLevel.dto';
 import {
   MainUpdateFlyLevelDtoDto,
@@ -48,7 +53,10 @@ export class FlyLevelController {
   })
   async createFlyLevel(
     @Body('level') createLevelDto: FlyLevel,
+    @User('admin') isAdmin: boolean,
   ): Promise<ResponseFlyLevelDto> {
+    if (!isAdmin)
+      throw new HttpException(ACCESS_DENIED, HttpStatus.UNPROCESSABLE_ENTITY);
     const level = await this.flyService.createFlyLevel(createLevelDto);
     return this.flyService.buildFlyLevelResponse(level);
   }
@@ -65,7 +73,10 @@ export class FlyLevelController {
   @ApiBearerAuth()
   async updateFlyLevel(
     @Body('level') updateLevelDto: UpdateFlyLevelDtoDto,
+    @User('admin') isAdmin: boolean,
   ): Promise<ResponseFlyLevelDto> {
+    if (!isAdmin)
+      throw new HttpException(ACCESS_DENIED, HttpStatus.UNPROCESSABLE_ENTITY);
     const level = await this.flyService.updateLevel(updateLevelDto);
     return this.flyService.buildFlyLevelResponse(level);
   }
@@ -77,7 +88,12 @@ export class FlyLevelController {
     status: 200,
     type: null,
   })
-  async deleteFlyLevel(@Param('id') id: string): Promise<null> {
+  async deleteFlyLevel(
+    @Param('id') id: string,
+    @User('admin') isAdmin: boolean,
+  ): Promise<null> {
+    if (!isAdmin)
+      throw new HttpException(ACCESS_DENIED, HttpStatus.UNPROCESSABLE_ENTITY);
     await this.flyService.deleteFlyLevel(id);
     return null;
   }

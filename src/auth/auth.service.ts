@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
 import { Model, Types } from 'mongoose';
 import { hash, compare } from 'bcrypt';
+import { sign } from 'jsonwebtoken';
 
 import { User, UserDocument } from './schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
@@ -63,11 +64,14 @@ export class AuthService {
     return { email: user.email };
   }
 
+  /**
+   * Создаёт jwt-строку
+   */
   generateJwt(user: UserDocument): string {
-    const { _id } = user;
-    return this.jwtService.sign(
-      { id: _id },
-      { secret: this.configService.get<string>('JWT_SECRET') },
+    const { _id, admin = false } = user;
+    return sign(
+      { id: _id, admin },
+      this.configService.get<string>('JWT_SECRET'),
     );
   }
 
