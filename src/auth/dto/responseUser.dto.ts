@@ -9,6 +9,8 @@ class UserDto {
   email: string;
   @ApiProperty()
   token: string;
+  @ApiProperty()
+  admin: boolean;
 }
 
 export class ResponseUserDto implements UserResponseInterface {

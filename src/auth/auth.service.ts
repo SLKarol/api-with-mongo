@@ -39,6 +39,7 @@ export class AuthService {
 
     const newUser = new this.userRepository(createUserDto);
     newUser.password = await hash(createUserDto.password, 10);
+    newUser.admin = 'admin' in createUserDto ? createUserDto.admin : false;
     return await newUser.save();
   }
 
@@ -71,12 +72,13 @@ export class AuthService {
   }
 
   buildUserResponse(user: UserDocument): ResponseUserDto {
-    const { username, email } = user;
+    const { username, email, admin } = user;
     return {
       user: {
         username,
         email,
         token: this.generateJwt(user),
+        admin,
       },
     };
   }
