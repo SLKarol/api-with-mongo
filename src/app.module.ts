@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { getMongoConfig } from './configs/mongo.config';
+import { FlyLevelModule } from './fly-level/fly-level.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { getMongoConfig } from './configs/mongo.config';
       useFactory: getMongoConfig,
     }),
     AuthModule,
+    FlyLevelModule,
   ],
   controllers: [AppController],
   providers: [AppService],

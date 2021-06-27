@@ -6,15 +6,16 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { hash, compare } from 'bcrypt';
 
 import { User, UserDocument } from './schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './dto/createUser.dto';
 import { USER_NOT_FOUND_ERROR, WRONG_PASSWORD_ERROR } from './auth.constants';
-import { UserResponseInterface } from './types/userResponse.interface';
 import { LoginUserDto } from './dto/loginUser.dto';
+import { UpdateUserDto } from './dto/updateUser.dto';
+import { ResponseUserDto } from './dto/responseUser.dto';
 
 @Injectable()
 export class AuthService {
@@ -62,14 +63,14 @@ export class AuthService {
   }
 
   generateJwt(user: UserDocument): string {
-    const { _id, email, username } = user;
+    const { _id } = user;
     return this.jwtService.sign(
-      { id: _id, email, username }, // ? Вероятно нужно оставить только id
+      { id: _id },
       { secret: this.configService.get<string>('JWT_SECRET') },
     );
   }
 
-  buildUserResponse(user: UserDocument): UserResponseInterface {
+  buildUserResponse(user: UserDocument): ResponseUserDto {
     const { username, email } = user;
     return {
       user: {
@@ -104,5 +105,13 @@ export class AuthService {
       );
     }
     return user;
+  }
+
+  async updateUser(userId: string, updateUserDto: UpdateUserDto) {
+    const user = await this.userRepository
+      .findById(new Types.ObjectId(userId))
+      .exec();
+    Object.assign(user, updateUserDto);
+    return await user.save();
   }
 }
