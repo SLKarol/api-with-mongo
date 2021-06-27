@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { FlyLevel } from '../schemas/fly-level.schema';
 
-export class MainCrUpFlyLevelDtoDto {
+export class MainCreateFlyLevelDtoDto {
   @ApiProperty()
   readonly level: FlyLevel;
 }
