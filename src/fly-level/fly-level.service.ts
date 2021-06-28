@@ -14,7 +14,7 @@ export class FlyLevelService {
   ) {}
 
   async findAll(): Promise<FlyLevelDocument[]> {
-    return this.flyLevelRepository.find().sort('speed').exec();
+    return this.flyLevelRepository.find().sort({ speed: -1 }).exec();
   }
 
   async createFlyLevel(createLevelDto: FlyLevel): Promise<FlyLevelDocument> {
