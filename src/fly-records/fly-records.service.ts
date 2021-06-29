@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { RecordByLevelDto } from './dto/listRecords.dto';
 
 import { WriteScroreDto } from './dto/writeRecord.dto';
 import { FlyRecords, FlyRecordsDocument } from './schemas/fly-records.schema';
@@ -41,9 +42,9 @@ export class FlyRecordsService {
     return true;
   }
 
-  async getAllRecords(): Promise<any> {
+  async getAllRecords(): Promise<RecordByLevelDto> {
     const re = await this.flyRecordsRepository
-      .aggregate<any[]>([
+      .aggregate([
         // Сортировка очков по убыванию
         { $sort: { score: -1 } },
         {
@@ -80,6 +81,7 @@ export class FlyRecordsService {
               $push: {
                 score: '$score',
                 userName: '$userName',
+                updatedAt: '$updatedAt',
               },
             },
           },
@@ -98,5 +100,14 @@ export class FlyRecordsService {
       })
       .exec();
     return !!existRecord;
+  }
+
+  /**
+   * Удалить записи по ID уровня
+   */
+  async deleteByLevelId(id: string) {
+    return await this.flyRecordsRepository.deleteMany({
+      id_level: new Types.ObjectId(id),
+    });
   }
 }

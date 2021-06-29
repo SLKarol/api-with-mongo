@@ -27,7 +27,6 @@ import {
 import { FlyLevelService } from './fly-level.service';
 import { FlyLevel } from './schemas/fly-level.schema';
 import { FlyRecordsService } from '@app/fly-records/fly-records.service';
-import { RECORD_EXISTING_LEVEL } from './consts/messages';
 
 @Controller('fly-level')
 export class FlyLevelController {
@@ -99,14 +98,8 @@ export class FlyLevelController {
   ): Promise<null> {
     if (!isAdmin)
       throw new HttpException(ACCESS_DENIED, HttpStatus.UNPROCESSABLE_ENTITY);
-    // Проверка на то, что на этом уровне есть очки
-    const haveRecords = await this.flyRecordsService.findByLevelId(id);
-    if (haveRecords) {
-      throw new HttpException(
-        RECORD_EXISTING_LEVEL,
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
-    }
+    // Удаление всех очков этого уровня
+    await this.flyRecordsService.deleteByLevelId(id);
     await this.flyLevelService.deleteFlyLevel(id);
     return null;
   }

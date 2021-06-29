@@ -5,10 +5,7 @@ import {
   UsePipes,
   ValidationPipe,
   UseGuards,
-  Put,
   Get,
-  Delete,
-  Param,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
@@ -20,8 +17,7 @@ import { ACCESS_DENIED } from '@app/consts/messages';
 
 import { FlyRecordsService } from './fly-records.service';
 import { MainWriteScroreDto, WriteScroreDto } from './dto/writeRecord.dto';
-import { FlyLevelService } from '@app/fly-level/fly-level.service';
-import { NOT_FOUND_LEVEL } from '@app/fly-level/consts/messages';
+import { RecordByLevelDto } from './dto/listRecords.dto';
 
 @Controller('fly-records')
 export class FlyRecordsController {
@@ -35,7 +31,7 @@ export class FlyRecordsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiResponse({
-    description: 'Зарегестрированный уровень',
+    description: 'Зарегестрирован результат?',
     status: 200,
     type: Boolean,
   })
@@ -53,7 +49,12 @@ export class FlyRecordsController {
   }
 
   @Get()
-  async getAllRecords(): Promise<any> {
+  @ApiResponse({
+    description: 'Отчёт по результатам игры',
+    type: [RecordByLevelDto],
+    status: 200,
+  })
+  async getAllRecords(): Promise<RecordByLevelDto> {
     return this.flyRecordsService.getAllRecords();
   }
 }
