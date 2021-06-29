@@ -26,10 +26,15 @@ import {
 } from './dto/updateFlyLevel.dto';
 import { FlyLevelService } from './fly-level.service';
 import { FlyLevel } from './schemas/fly-level.schema';
+import { FlyRecordsService } from '@app/fly-records/fly-records.service';
+import { RECORD_EXISTING_LEVEL } from './consts/messages';
 
 @Controller('fly-level')
 export class FlyLevelController {
-  constructor(private readonly flyService: FlyLevelService) {}
+  constructor(
+    private readonly flyLevelService: FlyLevelService,
+    private readonly flyRecordsService: FlyRecordsService,
+  ) {}
   @Get()
   @ApiResponse({
     description: 'Список уровней игры',
@@ -37,8 +42,8 @@ export class FlyLevelController {
     status: 200,
   })
   async getFlyLevels(): Promise<ListFlyLevelDto> {
-    const levels = await this.flyService.findAll();
-    return this.flyService.buildListFlyLevelResponse(levels);
+    const levels = await this.flyLevelService.findAll();
+    return this.flyLevelService.buildListFlyLevelResponse(levels);
   }
 
   @Post()
@@ -57,8 +62,8 @@ export class FlyLevelController {
   ): Promise<ResponseFlyLevelDto> {
     if (!isAdmin)
       throw new HttpException(ACCESS_DENIED, HttpStatus.UNPROCESSABLE_ENTITY);
-    const level = await this.flyService.createFlyLevel(createLevelDto);
-    return this.flyService.buildFlyLevelResponse(level);
+    const level = await this.flyLevelService.createFlyLevel(createLevelDto);
+    return this.flyLevelService.buildFlyLevelResponse(level);
   }
 
   @Put()
@@ -77,8 +82,8 @@ export class FlyLevelController {
   ): Promise<ResponseFlyLevelDto> {
     if (!isAdmin)
       throw new HttpException(ACCESS_DENIED, HttpStatus.UNPROCESSABLE_ENTITY);
-    const level = await this.flyService.updateLevel(updateLevelDto);
-    return this.flyService.buildFlyLevelResponse(level);
+    const level = await this.flyLevelService.updateLevel(updateLevelDto);
+    return this.flyLevelService.buildFlyLevelResponse(level);
   }
 
   @Delete(':id')
@@ -94,7 +99,15 @@ export class FlyLevelController {
   ): Promise<null> {
     if (!isAdmin)
       throw new HttpException(ACCESS_DENIED, HttpStatus.UNPROCESSABLE_ENTITY);
-    await this.flyService.deleteFlyLevel(id);
+    // Проверка на то, что на этом уровне есть очки
+    const haveRecords = await this.flyRecordsService.findByLevelId(id);
+    if (haveRecords) {
+      throw new HttpException(
+        RECORD_EXISTING_LEVEL,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    await this.flyLevelService.deleteFlyLevel(id);
     return null;
   }
 }

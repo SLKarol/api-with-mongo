@@ -33,14 +33,22 @@ export class FlyLevelService {
   async updateLevel(
     updateLevelDto: UpdateFlyLevelDtoDto,
   ): Promise<FlyLevelDocument> {
-    const level = await this.flyLevelRepository
-      .findById(new Types.ObjectId(updateLevelDto._id))
-      .exec();
+    const level = await this.findById(updateLevelDto._id);
     Object.assign(level, updateLevelDto);
     return await level.save();
   }
 
   async deleteFlyLevel(id: string) {
     this.flyLevelRepository.findByIdAndDelete(id).exec();
+  }
+
+  /**
+   * Найти уровень сложности по ID
+   * @param {string} id ID уровня сложности
+   */
+  async findById(id: string): Promise<FlyLevelDocument> {
+    return await this.flyLevelRepository
+      .findById(new Types.ObjectId(id))
+      .exec();
   }
 }
