@@ -20,8 +20,8 @@ export class FlyRecordsService {
     const { idLevel, score } = writeScroreDto;
     const existRecord = await this.flyRecordsRepository
       .findOne({
-        id_level: new Types.ObjectId(idLevel),
-        id_user: new Types.ObjectId(idUser),
+        id_level: idLevel,
+        id_user: idUser,
       })
       .exec();
     // Если запись существует и очки в этой записи больше, то не делать ничего
@@ -96,7 +96,7 @@ export class FlyRecordsService {
   async findByLevelId(id: string): Promise<boolean> {
     const existRecord = await this.flyRecordsRepository
       .findOne({
-        id_level: new Types.ObjectId(id),
+        id_level: id,
       })
       .exec();
     return !!existRecord;
@@ -107,7 +107,7 @@ export class FlyRecordsService {
    */
   async deleteByLevelId(id: string) {
     return await this.flyRecordsRepository.deleteMany({
-      id_level: new Types.ObjectId(id),
+      id_level: id,
     });
   }
 }

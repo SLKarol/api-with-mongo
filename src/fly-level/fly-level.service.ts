@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 
 import { ListFlyLevelDto, ResponseFlyLevelDto } from './dto/flyLevel.dto';
 import { UpdateFlyLevelDtoDto } from './dto/updateFlyLevel.dto';
@@ -47,8 +47,6 @@ export class FlyLevelService {
    * @param {string} id ID уровня сложности
    */
   async findById(id: string): Promise<FlyLevelDocument> {
-    return await this.flyLevelRepository
-      .findById(new Types.ObjectId(id))
-      .exec();
+    return await this.flyLevelRepository.findById(id).exec();
   }
 }
