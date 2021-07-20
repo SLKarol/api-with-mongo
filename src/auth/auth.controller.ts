@@ -6,6 +6,7 @@ import {
   ValidationPipe,
   UseGuards,
   Put,
+  Get,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
 
@@ -17,12 +18,12 @@ import { MainUpdateUserDto, UpdateUserDto } from './dto/updateUser.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ResponseUserDto } from './dto/responseUser.dto';
 
-@Controller('auth')
+@Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @UsePipes(new ValidationPipe())
-  @Post('register')
+  @Post('auth/register')
   @ApiBody({ type: MainCreateUserDto })
   @ApiResponse({
     description: 'Зарегестрированный пользователь',
@@ -37,7 +38,7 @@ export class AuthController {
   }
 
   @UsePipes(new ValidationPipe())
-  @Post('login')
+  @Post('auth/login')
   @ApiBody({ type: MainLoginDto })
   @ApiResponse({
     description: 'Успешно залогинился юзер',
@@ -67,6 +68,20 @@ export class AuthController {
       currentUserId,
       updateUserDto,
     );
+    return this.authService.buildUserResponse(user);
+  }
+
+  @Get('user')
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({
+    status: 200,
+    type: ResponseUserDto,
+    description: 'Данные о пользователе',
+  })
+  async getCurrentUser(
+    @User('id') currentUserId: string,
+  ): Promise<ResponseUserDto> {
+    const user = await this.authService.getUserById(currentUserId);
     return this.authService.buildUserResponse(user);
   }
 }

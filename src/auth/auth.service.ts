@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { hash, compare } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 
@@ -114,10 +114,13 @@ export class AuthService {
   }
 
   async updateUser(userId: string, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepository
-      .findById(new Types.ObjectId(userId))
-      .exec();
+    const user = await this.userRepository.findById(userId).exec();
     Object.assign(user, updateUserDto);
     return await user.save();
+  }
+
+  async getUserById(userId: string): Promise<UserDocument> {
+    const user = await this.userRepository.findById(userId).exec();
+    return user;
   }
 }
