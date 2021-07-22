@@ -78,6 +78,11 @@ export class AuthController {
     type: ResponseUserDto,
     description: 'Данные о пользователе',
   })
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    type: ResponseUserDto,
+  })
   async getCurrentUser(
     @User('id') currentUserId: string,
   ): Promise<ResponseUserDto> {
