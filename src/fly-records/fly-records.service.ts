@@ -1,26 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { RecordByLevelDto } from './dto/listRecords.dto';
 
 import { WriteScroreDto } from './dto/writeRecord.dto';
 import { FlyRecords, FlyRecordsDocument } from './schemas/fly-records.schema';
+import {
+  FlyLevel,
+  FlyLevelDocument,
+} from '@app/fly-level/schemas/fly-level.schema';
 
 @Injectable()
 export class FlyRecordsService {
   constructor(
     @InjectModel(FlyRecords.name)
     private readonly flyRecordsRepository: Model<FlyRecordsDocument>,
+    @InjectModel(FlyLevel.name)
+    private readonly flyLevelRepository: Model<FlyLevelDocument>,
   ) {}
 
   async sendRecord(
     idUser: string,
     writeScroreDto: WriteScroreDto,
   ): Promise<boolean> {
-    const { idLevel, score } = writeScroreDto;
+    const { idLevel = '', score, speed = 0 } = writeScroreDto;
+    let id_level = idLevel;
+    // Проверка на то, что дали рабочий уровень
+    if (idLevel) {
+      const level = await this.flyLevelRepository.findById(idLevel);
+      if (!level) {
+        throw new HttpException(
+          'Уровень с заданным id не найден',
+          HttpStatus.UNPROCESSABLE_ENTITY,
+        );
+      }
+      id_level = level.id;
+    }
+    // Получить id уровня
+    if (!idLevel) {
+      const level = await this.flyLevelRepository.findOne({ speed });
+      if (!level) {
+        throw new HttpException(
+          'Уровень с заданной скоростью не найден',
+          HttpStatus.UNPROCESSABLE_ENTITY,
+        );
+      }
+      id_level = level.id;
+    }
     const existRecord = await this.flyRecordsRepository
       .findOne({
-        id_level: idLevel,
+        id_level,
         id_user: idUser,
       })
       .exec();
@@ -34,7 +63,7 @@ export class FlyRecordsService {
     }
     // Создать новую запись
     const newRecord = new this.flyRecordsRepository({
-      id_level: Types.ObjectId(idLevel),
+      id_level: Types.ObjectId(id_level),
       id_user: Types.ObjectId(idUser),
       score,
     });

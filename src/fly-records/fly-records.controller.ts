@@ -32,7 +32,6 @@ export class FlyRecordsController {
   @UseGuards(JwtAuthGuard)
   @ApiResponse({
     description: 'Зарегестрирован результат?',
-    status: 200,
     type: Boolean,
   })
   async writeRecord(
@@ -52,7 +51,6 @@ export class FlyRecordsController {
   @ApiResponse({
     description: 'Отчёт по результатам игры',
     type: [RecordByLevelDto],
-    status: 200,
   })
   async getAllRecords(): Promise<RecordByLevelDto> {
     return this.flyRecordsService.getAllRecords();
